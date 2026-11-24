@@ -30,7 +30,7 @@ The same motivation might seem satisfied by a pile of files like Markdown. But e
 
 ## Conventions
 
-The conventions come in two layers.
+The conventions are divided into two parts.
 
 - Data conventions (Conventions 1–6) apply to every note and property in a note.sql file — whether a table comes from a published format or was added by the user to their own database.
 - Published-format conventions (Conventions 7–11) apply only to formats that are published.
