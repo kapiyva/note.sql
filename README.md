@@ -194,7 +194,6 @@ Advance `schema_version` for compatible evolution within the bounds of Conventio
 
 These are excluded to keep note.sql minimal and methodology-agnostic.
 
-- Mandatory enforcement of integrity at the DB level (the intent of references must be declared, and anything that modifies the database must respect it, but whether the database itself enforces it is not prescribed — Convention 4)
 - How CRUD operations should be implemented
 - Migration between versions of a format (only how a version is declared is defined — Convention 11)
 - Any obligation to provide views
