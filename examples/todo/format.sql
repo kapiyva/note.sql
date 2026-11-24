@@ -1,7 +1,7 @@
 -- todo: a simple todo format with status, due date, and tags.
--- Safe to re-apply to an existing database (Convention 6).
+-- Safe to re-apply to an existing database (Convention 10).
 
--- Single-value property (Convention 4): each task references one status.
+-- Single-value property (Convention 3): each task references one status.
 CREATE TABLE IF NOT EXISTS todo_status (
     id    TEXT PRIMARY KEY,
     label TEXT NOT NULL UNIQUE
@@ -13,20 +13,20 @@ CREATE TABLE IF NOT EXISTS todo_task (
     body         TEXT NOT NULL,
     created_at   TEXT NOT NULL,
     updated_at   TEXT NOT NULL,
-    status_id    TEXT REFERENCES todo_status(id),
+    status_id    TEXT REFERENCES todo_status(id) ON DELETE SET NULL,
     due_at       TEXT,           -- ISO 8601
     completed_at TEXT            -- ISO 8601
 );
 
--- Multi-value property (Convention 4): tasks and tags, many-to-many.
+-- Multi-value property (Convention 3): tasks and tags, many-to-many.
 CREATE TABLE IF NOT EXISTS todo_tag (
     id    TEXT PRIMARY KEY,     -- UUID recommended
     label TEXT NOT NULL UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS todo_task_tag (
-    task_id TEXT NOT NULL REFERENCES todo_task(id),
-    tag_id  TEXT NOT NULL REFERENCES todo_tag(id),
+    task_id TEXT NOT NULL REFERENCES todo_task(id) ON DELETE CASCADE,
+    tag_id  TEXT NOT NULL REFERENCES todo_tag(id)  ON DELETE CASCADE,
     PRIMARY KEY (task_id, tag_id)
 );
 
@@ -53,6 +53,6 @@ INSERT INTO todo_status (id, label) VALUES
     ('archived', 'Archived')
 ON CONFLICT (id) DO NOTHING;
 
--- Stamp the schema version this file defines (Convention 7).
+-- Stamp the schema version this file defines (Convention 11).
 INSERT INTO todo_meta (id, schema_version) VALUES (1, 1)
 ON CONFLICT (id) DO UPDATE SET schema_version = excluded.schema_version;
