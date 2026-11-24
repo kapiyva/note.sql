@@ -70,14 +70,14 @@ id    TEXT PRIMARY KEY  -- UUID recommended
 label TEXT NOT NULL     -- human-readable display value
 ```
 
-`label` is the row's human-readable display value — the one string a generic client can always show for the row (the tag text, a status name).
+`label` is the row's human-readable display value — the one string that even a tool unaware of the format can always show for the row (the tag text, a status name).
 
 A note references a property in one of two ways:
 
 - Single-value — the note table holds a reference column to the property table (e.g. `status_id TEXT REFERENCES todo_status(id) ON DELETE SET NULL`). Each note carries at most one value. Per Convention 6, the column is nullable or has a `DEFAULT`.
 - Multi-value — a junction table holds one reference column to the note table and one to the property table (e.g. `todo_task_tag(task_id, tag_id)`). Each note carries any number of values.
 
-In both patterns, references are declared per Convention 4. This is what lets a generic client discover properties mechanically, without relying on table or column names: find the tables shaped `id` + `label`, then follow the reference columns declared to point at them — directly from a note table, or through a junction table.
+In both patterns, references are declared per Convention 4. This is what lets even a tool unaware of the format discover properties mechanically, without relying on table or column names: find the tables shaped `id` + `label`, then follow the reference columns declared to point at them — directly from a note table, or through a junction table.
 
 note.sql implies no uniqueness beyond the primary key. Add constraints that match your semantics — e.g. `UNIQUE` on `label` where the vocabulary should not repeat, or a primary key of `(task_id, tag_id)` on a junction table where a note carries each tag at most once.
 
@@ -99,7 +99,7 @@ tag_id  TEXT NOT NULL REFERENCES todo_tag(id)  ON DELETE CASCADE,
 status_id TEXT REFERENCES todo_status(id) ON DELETE SET NULL
 ```
 
-note.sql requires the intent to be declared, not enforced. In SQLite, foreign key enforcement is a per-connection setting (`PRAGMA foreign_keys`) and is not stored in the database file. Generic clients are recommended to set `PRAGMA foreign_keys = ON` on connections they write through, so that deletions follow what is declared.
+Anything that modifies the database must respect the declared intent: when it deletes a referenced row, the result must be what is declared. How it achieves this — through the database's foreign key enforcement or by handling it itself — is not prescribed.
 
 ### 5. Timestamps
 
@@ -116,7 +116,7 @@ The width is fixed so that string order matches chronological order. In SQLite, 
 
 ### 6. Extensibility
 
-- On note tables, property tables, and the junction tables of Convention 3, columns beyond those specified by note.sql must be nullable or carry a `DEFAULT`, so that a client knowing only the note.sql-defined columns can still insert a valid row
+- On note tables, property tables, and the junction tables of Convention 3, columns beyond those specified by note.sql must be nullable or carry a `DEFAULT`, so that a tool knowing only the note.sql-defined columns can still insert a valid row
 - Anything not defined by note.sql is up to you
 
 ---
@@ -184,7 +184,7 @@ schema_version INTEGER NOT NULL
 
 Further metadata is held as additional columns (nullable or with a `DEFAULT`, per Convention 6). The single row can be enforced with a constraint such as the `CHECK (id = 1)` above.
 
-Because note.sql assumes multiple formats coexist in one database, a database-global marker such as `PRAGMA user_version` cannot serve this purpose: the version has to be held per format, which means a prefixed table (Conventions 7 and 8). A generic client can then detect the version of any format with a single query.
+Because note.sql assumes multiple formats coexist in one database, a database-global marker such as `PRAGMA user_version` cannot serve this purpose: the version has to be held per format, which means a prefixed table (Conventions 7 and 8). Even a tool unaware of the format can then detect its version with a single query.
 
 Advance `schema_version` for compatible evolution within the bounds of Conventions 6 and 9. Breaking changes are published under a distinct name.
 
@@ -194,7 +194,7 @@ Advance `schema_version` for compatible evolution within the bounds of Conventio
 
 These are excluded to keep note.sql minimal and methodology-agnostic.
 
-- Mandatory enforcement of integrity at the DB level (the intent of references must be declared, but whether it is enforced is left to whoever opens the database — Convention 4)
+- Mandatory enforcement of integrity at the DB level (the intent of references must be declared, and anything that modifies the database must respect it, but whether the database itself enforces it is not prescribed — Convention 4)
 - How CRUD operations should be implemented
 - Migration between versions of a format (only how a version is declared is defined — Convention 11)
 - Any obligation to provide views
