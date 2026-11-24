@@ -77,7 +77,7 @@ A note references a property in one of two ways:
 - Single-value — the note table holds a reference column to the property table (e.g. `status_id TEXT REFERENCES todo_status(id) ON DELETE SET NULL`). Each note carries at most one value. Per Convention 6, the column is nullable or has a `DEFAULT`.
 - Multi-value — a junction table holds one reference column to the note table and one to the property table (e.g. `todo_task_tag(task_id, tag_id)`). Each note carries any number of values.
 
-In both patterns, references are declared per Convention 4. This is what lets even a tool unaware of the format discover properties mechanically, without relying on table or column names: find the tables shaped `id` + `label`, then follow the reference columns declared to point at them — directly from a note table, or through a junction table.
+In both patterns, references are declared per Convention 4. This is what lets even a tool unaware of the format discover properties mechanically: find the tables shaped `id` + `label`, then follow the reference columns declared to point at them — directly from a note table, or through a junction table.
 
 note.sql implies no uniqueness beyond the primary key. Add constraints that match your semantics — e.g. `UNIQUE` on `label` where the vocabulary should not repeat, or a primary key of `(task_id, tag_id)` on a junction table where a note carries each tag at most once.
 
@@ -140,7 +140,7 @@ Table names and view names must be prefixed with the format name. Because SQL id
 <format>_<view>_view  -- e.g. zettelkasten_graph_view (views are recommended, not required)
 ```
 
-Because references are declared (Convention 4), names are not used for mechanical discovery. Still, to keep names consistent, the following style is recommended.
+To keep names consistent, the following style is recommended.
 
 - The part after the prefix uses the singular form (e.g. `..._note`, `..._task`, `..._tag` — not `..._notes`).
 - A reference column is named after the table it points to: the referenced table's singular name with the format prefix removed, plus `_id` (`todo_task` → `task_id`, `todo_tag` → `tag_id`, `diary_entry` → `entry_id`).
