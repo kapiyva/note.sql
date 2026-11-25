@@ -14,8 +14,8 @@ CREATE TABLE IF NOT EXISTS todo_task (
     created_at   TEXT NOT NULL,
     updated_at   TEXT NOT NULL,
     status_id    TEXT REFERENCES todo_status(id) ON DELETE SET NULL,
-    due_at       TEXT,           -- ISO 8601
-    completed_at TEXT            -- ISO 8601
+    due_at       TEXT,           -- UTC timestamp (Convention 5)
+    completed_at TEXT            -- UTC timestamp (Convention 5)
 );
 
 -- Multi-value property (Convention 3): tasks and tags, many-to-many.

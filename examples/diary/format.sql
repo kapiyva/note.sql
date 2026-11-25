@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS diary_entry (
     body       TEXT NOT NULL,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,
-    entry_date TEXT,             -- ISO 8601 date (YYYY-MM-DD)
+    entry_date TEXT,             -- date, YYYY-MM-DD (Convention 5)
     mood       TEXT              -- free text or rating
 );
 

@@ -30,6 +30,35 @@ The same motivation might seem satisfied by a pile of files like Markdown. But e
 
 ## Conventions
 
+### What to Follow
+
+Every note and property (data conventions)
+
+1. A note table has `id`, `title`, `body`, `created_at`, and `updated_at` (Convention 2)
+2. A reference to a note or a property declares `REFERENCES` and `ON DELETE` (Convention 4)
+3. A column holding a timestamp is named with the suffix `_at`, one holding a date with `_date`, and its value is stored in the fixed form (Convention 5)
+4. A column not defined by note.sql is nullable or has a `DEFAULT` (Convention 6)
+
+A published format, in addition
+
+5. Has at least one note table (Convention 7)
+6. References only tables of the same format (Convention 7)
+7. Prefixes its table and view names with the format name (Convention 8)
+
+The smallest format satisfies the conventions with this single table.
+
+```sql
+CREATE TABLE IF NOT EXISTS basic_note (
+    id         TEXT PRIMARY KEY,
+    title      TEXT,
+    body       TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
+```
+
+### How the Conventions Are Organized
+
 The conventions are divided into two parts.
 
 - Data conventions (Conventions 1–6) apply to every note and property in a note.sql file — whether a table comes from a published format or was added by the user to their own database.
@@ -101,15 +130,18 @@ status_id TEXT REFERENCES todo_status(id) ON DELETE SET NULL
 
 Anything that modifies the database must respect the declared intent: when it deletes a referenced row, the result must be what is declared. How it achieves this — through the database's foreign key enforcement or by handling it itself — is not prescribed.
 
-### 5. Timestamps
+### 5. Timestamps and Dates
 
-`created_at` and `updated_at` on note tables hold UTC timestamps in the following fixed-width form.
+On note tables, property tables, and the junction tables of Convention 3, a column whose name ends in `_at` holds a timestamp, and one whose name ends in `_date` holds a date. A column that holds a timestamp or a date must be named with one of these suffixes and store its value in the following fixed-width form.
 
-```
-YYYY-MM-DDTHH:MM:SS.sssZ   -- e.g. 2026-11-24T09:30:00.000Z
-```
+| Suffix | Meaning | Form | Example |
+|---|---|---|---|
+| `_at` | UTC timestamp | `YYYY-MM-DDTHH:MM:SSZ` | `2026-11-25T10:00:00Z` |
+| `_date` | Date | `YYYY-MM-DD` | `2026-11-25` |
 
-The width is fixed so that string order matches chronological order. In SQLite, `strftime('%Y-%m-%dT%H:%M:%fZ', 'now')` produces it.
+The width is fixed so that string order matches chronological order. In SQLite, `strftime('%Y-%m-%dT%H:%M:%SZ', 'now')` produces a timestamp and `date('now')` a date.
+
+`created_at` and `updated_at` on note tables follow this convention too.
 
 - `created_at` is when the note was created.
 - `updated_at` is when the note's content, or the properties assigned to it (single-value or multi-value), last changed. Changing a vocabulary entry itself (such as a property table's `label`) does not change `updated_at` on the notes that carry it.
