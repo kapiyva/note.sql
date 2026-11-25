@@ -30,20 +30,22 @@ The same motivation might seem satisfied by a pile of files like Markdown. But e
 
 ## Conventions at a Glance
 
+A SQLite database that contains at least one note table (Convention 1) is a note.sql file.
+
 The conventions are divided into two parts: data conventions and published-format conventions.
 
 The data conventions apply to every note and property in a note.sql file.
 
-1. A note table has `id`, `title`, `body`, `created_at`, and `updated_at` (Convention 2)
-2. A reference to a note or a property declares `REFERENCES` and `ON DELETE` (Convention 4)
-3. A column holding a timestamp is named with the suffix `_at`, one holding a date with `_date`, and its value is stored in the fixed form (Convention 5)
-4. A column not defined by note.sql is nullable or has a `DEFAULT` (Convention 6)
+1. A note table has `id`, `title`, `body`, `created_at`, and `updated_at` (Convention 1)
+2. A reference to a note or a property declares `REFERENCES` and `ON DELETE` (Convention 3)
+3. A column holding a timestamp is named with the suffix `_at`, one holding a date with `_date`, and its value is stored in the fixed form (Convention 4)
+4. A column not defined by note.sql is nullable or has a `DEFAULT` (Convention 5)
 
 You may publish a format you create. A format you publish must satisfy the following published-format conventions in addition to the data conventions.
 
-5. Has at least one note table (Convention 7)
-6. References only tables of the same format (Convention 7)
-7. Prefixes its table and view names with the format name (Convention 8)
+5. Has at least one note table (Convention 6)
+6. References only tables of the same format (Convention 6)
+7. Prefixes its table and view names with the format name (Convention 7)
 
 The smallest format satisfies the conventions with this single table.
 
@@ -61,11 +63,7 @@ CREATE TABLE IF NOT EXISTS basic_note (
 
 ## Data Conventions
 
-### 1. note.sql File
-
-A SQLite database that contains at least one note table (Convention 2) is a note.sql file.
-
-### 2. Note Table
+### 1. Note Table
 
 The central concept of note.sql is the note table. Any table that has at least the following columns is a note table.
 
@@ -73,15 +71,15 @@ The central concept of note.sql is the note table. Any table that has at least t
 id         TEXT PRIMARY KEY  -- UUID recommended
 title      TEXT              -- nullable
 body       TEXT NOT NULL
-created_at TEXT NOT NULL     -- UTC timestamp (Convention 5)
-updated_at TEXT NOT NULL     -- UTC timestamp (Convention 5)
+created_at TEXT NOT NULL     -- UTC timestamp (Convention 4)
+updated_at TEXT NOT NULL     -- UTC timestamp (Convention 4)
 ```
 
 `body` is the note's content and is required. `title` is an optional heading: many notes — quick captures, journal entries, fleeting notes — are body only, and giving a note a heading is itself an act of curation that not every methodology has.
 
 How note tables are used is up to you. For Zettelkasten, for example, a single note table with links managed in a separate table is valid, as is a separate note table for each note type (literature note, permanent note, etc.).
 
-### 3. Property Tables
+### 2. Property Tables
 
 A property table holds the vocabulary of values a note can carry — tags, statuses, moods. Any table that has at least the following columns is a property table.
 
@@ -94,16 +92,16 @@ label TEXT NOT NULL     -- human-readable display value
 
 A note references a property in one of two ways:
 
-- Single-value — the note table holds a reference column to the property table (e.g. `status_id TEXT REFERENCES todo_status(id) ON DELETE SET NULL`). Each note carries at most one value. Per Convention 6, the column is nullable or has a `DEFAULT`.
+- Single-value — the note table holds a reference column to the property table (e.g. `status_id TEXT REFERENCES todo_status(id) ON DELETE SET NULL`). Each note carries at most one value. Per Convention 5, the column is nullable or has a `DEFAULT`.
 - Multi-value — a junction table holds one reference column to the note table and one to the property table (e.g. `todo_task_tag(task_id, tag_id)`). Each note carries any number of values.
 
-In both patterns, references are declared per Convention 4. This is what lets even a tool unaware of the format discover properties mechanically: find the tables shaped `id` + `label`, then follow the reference columns declared to point at them — directly from a note table, or through a junction table.
+In both patterns, references are declared per Convention 3. This is what lets even a tool unaware of the format discover properties mechanically: find the tables shaped `id` + `label`, then follow the reference columns declared to point at them — directly from a note table, or through a junction table.
 
 note.sql implies no uniqueness beyond the primary key. Add constraints that match your semantics — e.g. `UNIQUE` on `label` where the vocabulary should not repeat, or a primary key of `(task_id, tag_id)` on a junction table where a note carries each tag at most once.
 
-Tables that do not match the shapes of Conventions 2 and 3 are neither note tables nor property tables. Apart from Convention 4, note.sql places no restrictions on them.
+Tables that do not match the shapes of Conventions 1 and 2 are neither note tables nor property tables. Apart from Convention 3, note.sql places no restrictions on them.
 
-### 4. Declared References
+### 3. Declared References
 
 Any column, in any table, that references a note table or a property table must declare both:
 
@@ -121,9 +119,9 @@ status_id TEXT REFERENCES todo_status(id) ON DELETE SET NULL
 
 Anything that modifies the database must respect the declared intent: when it deletes a referenced row, the result must be what is declared. How it achieves this — through the database's foreign key enforcement or by handling it itself — is not prescribed.
 
-### 5. Timestamps and Dates
+### 4. Timestamps and Dates
 
-On note tables, property tables, and the junction tables of Convention 3, a column whose name ends in `_at` holds a timestamp, and one whose name ends in `_date` holds a date. A column that holds a timestamp or a date must be named with one of these suffixes and store its value in the following fixed-width form.
+On note tables, property tables, and the junction tables of Convention 2, a column whose name ends in `_at` holds a timestamp, and one whose name ends in `_date` holds a date. A column that holds a timestamp or a date must be named with one of these suffixes and store its value in the following fixed-width form.
 
 | Suffix | Meaning | Form | Example |
 |---|---|---|---|
@@ -137,24 +135,24 @@ The width is fixed so that string order matches chronological order. In SQLite, 
 - `created_at` is when the note was created.
 - `updated_at` is when the note's content, or the properties assigned to it (single-value or multi-value), last changed. Changing a vocabulary entry itself (such as a property table's `label`) does not change `updated_at` on the notes that carry it.
 
-### 6. Extensibility
+### 5. Extensibility
 
-- On note tables, property tables, and the junction tables of Convention 3, columns beyond those specified by note.sql must be nullable or carry a `DEFAULT`, so that a tool knowing only the note.sql-defined columns can still insert a valid row
+- On note tables, property tables, and the junction tables of Convention 2, columns beyond those specified by note.sql must be nullable or carry a `DEFAULT`, so that a tool knowing only the note.sql-defined columns can still insert a valid row
 - Anything not defined by note.sql is up to you
 
 ---
 
 ## Published-Format Conventions
 
-### 7. Formats
+### 6. Formats
 
 A format is a set of DDL representing a particular methodology. A format satisfies the data conventions, and in addition:
 
 - It must have at least one note table.
-- It may include tables beyond note tables, such as tags, links, or settings. Because multiple formats can coexist in a single SQLite database, all table and view names must follow the prefix rule in Convention 8 to prevent name collisions.
+- It may include tables beyond note tables, such as tags, links, or settings. Because multiple formats can coexist in a single SQLite database, all table and view names must follow the prefix rule in Convention 7 to prevent name collisions.
 - Its references must point only at tables of the same format. A reference across formats would create a dependency between them.
 
-### 8. Prefixes and Naming
+### 7. Prefixes and Naming
 
 Table names and view names must be prefixed with the format name. Because SQL identifiers do not allow hyphens, the prefix uses underscores even when the format name contains hyphens (e.g. the format `cornell-notes` uses the prefix `cornell_notes`).
 
@@ -168,14 +166,14 @@ To keep names consistent, the following style is recommended.
 - The part after the prefix uses the singular form (e.g. `..._note`, `..._task`, `..._tag` — not `..._notes`).
 - A reference column is named after the table it points to: the referenced table's singular name with the format prefix removed, plus `_id` (`todo_task` → `task_id`, `todo_tag` → `tag_id`, `diary_entry` → `entry_id`).
 
-### 9. Compatibility
+### 8. Compatibility
 
 To avoid breaking databases that use a format under the same name, and the user tables that reference it, the following changes are discouraged:
 
 - Changing the type of an existing column, or dropping it
 - Dropping or renaming an existing table
 
-A breaking change that needs any of these is published under a distinct name (Convention 11).
+A breaking change that needs any of these is published under a distinct name (Convention 10).
 
 A user who wants to extend a published format's table is recommended to create their own table that references the note's `id`, rather than adding columns to the format's table. A column added directly may collide with a column of the same name added by a later version of the format, or be lost by a migration that rebuilds the table.
 
@@ -187,7 +185,7 @@ CREATE TABLE my_task_estimate (
 );
 ```
 
-### 10. Re-applicable format.sql
+### 9. Re-applicable format.sql
 
 A `format.sql` is the complete, current definition of a format. It is recommended that it also be safe to re-apply to a database that already holds data — running it again converges the database on the current definition instead of failing or destroying anything.
 
@@ -196,7 +194,7 @@ A `format.sql` is the complete, current definition of a format. It is recommende
 
 Views hold no state, so re-applying `format.sql` is itself the mechanism for updating them. This removes stale views from a format's concerns entirely, and leaves transforming existing tables as the only thing a migration has to do. How that transformation is carried out is outside note.sql.
 
-### 11. Version Declaration
+### 10. Version Declaration
 
 It is recommended that a format have a `<format>_meta` table: a single-row table holding at least `schema_version INTEGER NOT NULL`, which declares the format's current version.
 
@@ -205,11 +203,11 @@ id             INTEGER PRIMARY KEY CHECK (id = 1)  -- one row only
 schema_version INTEGER NOT NULL
 ```
 
-Further metadata is held as additional columns (nullable or with a `DEFAULT`, per Convention 6). The single row can be enforced with a constraint such as the `CHECK (id = 1)` above.
+Further metadata is held as additional columns (nullable or with a `DEFAULT`, per Convention 5). The single row can be enforced with a constraint such as the `CHECK (id = 1)` above.
 
-Because note.sql assumes multiple formats coexist in one database, a database-global marker such as `PRAGMA user_version` cannot serve this purpose: the version has to be held per format, which means a prefixed table (Conventions 7 and 8). Even a tool unaware of the format can then detect its version with a single query.
+Because note.sql assumes multiple formats coexist in one database, a database-global marker such as `PRAGMA user_version` cannot serve this purpose: the version has to be held per format, which means a prefixed table (Conventions 6 and 7). Even a tool unaware of the format can then detect its version with a single query.
 
-Advance `schema_version` for compatible evolution within the bounds of Conventions 6 and 9. Breaking changes are published under a distinct name.
+Advance `schema_version` for compatible evolution within the bounds of Conventions 5 and 8. Breaking changes are published under a distinct name.
 
 ---
 
@@ -219,7 +217,7 @@ Advance `schema_version` for compatible evolution within the bounds of Conventio
 2. Prepare a `spec.md` describing the design intent.
 3. Publish both in any repository.
 
-The format name becomes the table prefix (Convention 8), so choose a name distinctive enough to avoid colliding with other formats in the same database. The same applies when a breaking change is published under a distinct name (Conventions 9 and 11). note.sql prescribes no versioning scheme beyond that.
+The format name becomes the table prefix (Convention 7), so choose a name distinctive enough to avoid colliding with other formats in the same database. The same applies when a breaking change is published under a distinct name (Conventions 8 and 10). note.sql prescribes no versioning scheme beyond that.
 
 ---
 
@@ -228,7 +226,7 @@ The format name becomes the table prefix (Convention 8), so choose a name distin
 These are excluded to keep note.sql minimal and methodology-agnostic.
 
 - How CRUD operations should be implemented
-- Migration between versions of a format (only how a version is declared is defined — Convention 11)
+- Migration between versions of a format (only how a version is declared is defined — Convention 10)
 - Any obligation to provide views
 - How a particular methodology must be expressed
 - Hints about UI or presentation

@@ -1,5 +1,5 @@
 -- diary: a simple diary format with one entry per date and tags.
--- Safe to re-apply to an existing database (Convention 10).
+-- Safe to re-apply to an existing database (Convention 9).
 
 CREATE TABLE IF NOT EXISTS diary_entry (
     id         TEXT PRIMARY KEY,
@@ -7,11 +7,11 @@ CREATE TABLE IF NOT EXISTS diary_entry (
     body       TEXT NOT NULL,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,
-    entry_date TEXT,             -- date, YYYY-MM-DD (Convention 5)
+    entry_date TEXT,             -- date, YYYY-MM-DD (Convention 4)
     mood       TEXT              -- free text or rating
 );
 
--- Multi-value property (Convention 3): entries and tags, many-to-many.
+-- Multi-value property (Convention 2): entries and tags, many-to-many.
 CREATE TABLE IF NOT EXISTS diary_tag (
     id    TEXT PRIMARY KEY,      -- UUID recommended
     label TEXT NOT NULL UNIQUE
@@ -28,6 +28,6 @@ CREATE TABLE IF NOT EXISTS diary_meta (
     schema_version INTEGER NOT NULL
 );
 
--- Stamp the schema version this file defines (Convention 11).
+-- Stamp the schema version this file defines (Convention 10).
 INSERT INTO diary_meta (id, schema_version) VALUES (1, 1)
 ON CONFLICT (id) DO UPDATE SET schema_version = excluded.schema_version;
