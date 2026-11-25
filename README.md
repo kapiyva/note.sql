@@ -28,18 +28,18 @@ The same motivation might seem satisfied by a pile of files like Markdown. But e
 
 ---
 
-## Conventions
+## Conventions at a Glance
 
-### What to Follow
+The conventions are divided into two parts: data conventions and published-format conventions.
 
-Every note and property (data conventions)
+The data conventions apply to every note and property in a note.sql file — whether a table comes from a format or was added by the user to their own database.
 
 1. A note table has `id`, `title`, `body`, `created_at`, and `updated_at` (Convention 2)
 2. A reference to a note or a property declares `REFERENCES` and `ON DELETE` (Convention 4)
 3. A column holding a timestamp is named with the suffix `_at`, one holding a date with `_date`, and its value is stored in the fixed form (Convention 5)
 4. A column not defined by note.sql is nullable or has a `DEFAULT` (Convention 6)
 
-A published format, in addition
+You may publish a format you create. A format you publish must satisfy the following published-format conventions in addition to the data conventions. Tables you use only in your own database need not follow them.
 
 5. Has at least one note table (Convention 7)
 6. References only tables of the same format (Convention 7)
@@ -56,15 +56,6 @@ CREATE TABLE IF NOT EXISTS basic_note (
     updated_at TEXT NOT NULL
 );
 ```
-
-### How the Conventions Are Organized
-
-The conventions are divided into two parts.
-
-- Data conventions (Conventions 1–6) apply to every note and property in a note.sql file — whether a table comes from a published format or was added by the user to their own database.
-- Published-format conventions (Conventions 7–11) apply only to formats that are published.
-
-Users may add tables to their own database freely. A table meant to hold notes should follow the data conventions; it need not follow the published-format conventions such as the prefix rule.
 
 ---
 
@@ -222,6 +213,16 @@ Advance `schema_version` for compatible evolution within the bounds of Conventio
 
 ---
 
+## Publishing a Format
+
+1. Prepare a DDL file (`format.sql`) that satisfies note.sql.
+2. Prepare a `spec.md` describing the design intent.
+3. Publish both in any repository.
+
+The format name becomes the table prefix (Convention 8), so choose a name distinctive enough to avoid colliding with other formats in the same database. The same applies when a breaking change is published under a distinct name (Conventions 9 and 11). note.sql prescribes no versioning scheme beyond that.
+
+---
+
 ## What note.sql Intentionally Leaves Out
 
 These are excluded to keep note.sql minimal and methodology-agnostic.
@@ -231,16 +232,6 @@ These are excluded to keep note.sql minimal and methodology-agnostic.
 - Any obligation to provide views
 - How a particular methodology must be expressed
 - Hints about UI or presentation
-
----
-
-## Publishing a Format
-
-1. Prepare a DDL file (`format.sql`) that satisfies note.sql.
-2. Prepare a `spec.md` describing the design intent.
-3. Publish both in any repository.
-
-The format name becomes the table prefix (Convention 8), so choose a name distinctive enough to avoid colliding with other formats in the same database. The same applies when a breaking change is published under a distinct name (Conventions 9 and 11). note.sql prescribes no versioning scheme beyond that.
 
 ## Examples
 
