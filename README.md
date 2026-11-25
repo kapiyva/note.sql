@@ -39,7 +39,7 @@ The data conventions apply to every note and property in a note.sql file.
 3. A column holding a timestamp is named with the suffix `_at`, one holding a date with `_date`, and its value is stored in the fixed form (Convention 5)
 4. A column not defined by note.sql is nullable or has a `DEFAULT` (Convention 6)
 
-You may publish a format you create. A format you publish must satisfy the following published-format conventions in addition to the data conventions. Tables you use only in your own database need not follow them.
+You may publish a format you create. A format you publish must satisfy the following published-format conventions in addition to the data conventions.
 
 5. Has at least one note table (Convention 7)
 6. References only tables of the same format (Convention 7)
