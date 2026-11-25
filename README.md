@@ -32,7 +32,7 @@ The same motivation might seem satisfied by a pile of files like Markdown. But e
 
 The conventions are divided into two parts: data conventions and published-format conventions.
 
-The data conventions apply to every note and property in a note.sql file — whether a table comes from a format or was added by the user to their own database.
+The data conventions apply to every note and property in a note.sql file.
 
 1. A note table has `id`, `title`, `body`, `created_at`, and `updated_at` (Convention 2)
 2. A reference to a note or a property declares `REFERENCES` and `ON DELETE` (Convention 4)
