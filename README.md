@@ -37,15 +37,16 @@ The conventions are divided into two parts: data conventions and published-forma
 The data conventions apply to every note and property in a note.sql file.
 
 1. A note table has `id`, `title`, `body`, `created_at`, and `updated_at` (Convention 1)
-2. A reference to a note or a property declares `REFERENCES` and `ON DELETE` (Convention 3)
-3. A column holding a timestamp is named with the suffix `_at`, one holding a date with `_date`, and its value is stored in the fixed form (Convention 4)
-4. A column not defined by note.sql is nullable or has a `DEFAULT` (Convention 5)
+2. A property table has `id` and `label` (Convention 2)
+3. A reference to a note or a property declares `REFERENCES` and `ON DELETE` (Convention 3)
+4. A column holding a timestamp is named with the suffix `_at`, one holding a date with `_date`, and its value is stored in the fixed form (Convention 4)
+5. On note tables, property tables, and junction tables, a column not defined by note.sql is nullable or has a `DEFAULT` (Convention 5)
 
 You may publish a format you create. A format you publish must satisfy the following published-format conventions in addition to the data conventions.
 
-5. Has at least one note table (Convention 6)
-6. References only tables of the same format (Convention 6)
-7. Prefixes its table and view names with the format name (Convention 7)
+6. Has at least one note table (Convention 6)
+7. References only tables of the same format (Convention 6)
+8. Prefixes its table and view names with the format name (Convention 7)
 
 The smallest format satisfies the conventions with this single table.
 
