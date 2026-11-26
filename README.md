@@ -167,26 +167,7 @@ To keep names consistent, the following style is recommended.
 - The part after the prefix uses the singular form (e.g. `..._note`, `..._task`, `..._tag` — not `..._notes`).
 - A reference column is named after the table it points to: the referenced table's singular name with the format prefix removed, plus `_id` (`todo_task` → `task_id`, `todo_tag` → `tag_id`, `diary_entry` → `entry_id`).
 
-### 8. Compatibility
-
-To avoid breaking databases that use a format under the same name, and the user tables that reference it, the following changes are discouraged:
-
-- Changing the type of an existing column, or dropping it
-- Dropping or renaming an existing table
-
-A breaking change that needs any of these is published under a distinct name (Convention 10).
-
-A user who wants to extend a published format's table is recommended to create their own table that references the note's `id`, rather than adding columns to the format's table. A column added directly may collide with a column of the same name added by a later version of the format, or be lost by a migration that rebuilds the table.
-
-```sql
--- e.g. keep your own time estimate for todo_task
-CREATE TABLE my_task_estimate (
-    task_id TEXT PRIMARY KEY REFERENCES todo_task(id) ON DELETE CASCADE,
-    minutes INTEGER
-);
-```
-
-### 9. Re-applicable format.sql
+### 8. Re-applicable format.sql
 
 A `format.sql` is the complete, current definition of a format. It is recommended that it also be safe to re-apply to a database that already holds data — running it again converges the database on the current definition instead of failing or destroying anything.
 
@@ -195,7 +176,7 @@ A `format.sql` is the complete, current definition of a format. It is recommende
 
 Views hold no state, so re-applying `format.sql` is itself the mechanism for updating them. This removes stale views from a format's concerns entirely, and leaves transforming existing tables as the only thing a migration has to do. How that transformation is carried out is outside note.sql.
 
-### 10. Version Declaration
+### 9. Version Declaration
 
 It is recommended that a format have a `<format>_meta` table: a single-row table holding at least `schema_version INTEGER NOT NULL`, which declares the format's current version.
 
@@ -208,7 +189,7 @@ Further metadata is held as additional columns (nullable or with a `DEFAULT`, pe
 
 Because note.sql assumes multiple formats coexist in one database, a database-global marker such as `PRAGMA user_version` cannot serve this purpose: the version has to be held per format, which means a prefixed table (Conventions 6 and 7). Even a tool unaware of the format can then detect its version with a single query.
 
-Advance `schema_version` for compatible evolution within the bounds of Conventions 5 and 8. Breaking changes are published under a distinct name.
+Advance `schema_version` for backward-compatible changes. Dropping or renaming an existing table or column, or changing a column's type, is a breaking change and is published under a distinct name.
 
 ---
 
@@ -218,7 +199,7 @@ Advance `schema_version` for compatible evolution within the bounds of Conventio
 2. Prepare a `spec.md` describing the design intent.
 3. Publish both in any repository.
 
-The format name becomes the table prefix (Convention 7), so choose a name distinctive enough to avoid colliding with other formats in the same database. The same applies when a breaking change is published under a distinct name (Conventions 8 and 10). note.sql prescribes no versioning scheme beyond that.
+The format name becomes the table prefix (Convention 7), so choose a name distinctive enough to avoid colliding with other formats in the same database. The same applies when a breaking change is published under a distinct name (Convention 9). note.sql prescribes no versioning scheme beyond that.
 
 ---
 
@@ -227,7 +208,7 @@ The format name becomes the table prefix (Convention 7), so choose a name distin
 These are excluded to keep note.sql minimal and methodology-agnostic.
 
 - How CRUD operations should be implemented
-- Migration between versions of a format (only how a version is declared is defined — Convention 10)
+- Migration between versions of a format (only how a version is declared is defined — Convention 9)
 - Any obligation to provide views
 - How a particular methodology must be expressed
 - Hints about UI or presentation

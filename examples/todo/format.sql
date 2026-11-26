@@ -1,5 +1,5 @@
 -- todo: a simple todo format with status, due date, and tags.
--- Safe to re-apply to an existing database (Convention 9).
+-- Safe to re-apply to an existing database (Convention 8).
 
 -- Single-value property (Convention 2): each task references one status.
 CREATE TABLE IF NOT EXISTS todo_status (
@@ -53,6 +53,6 @@ INSERT INTO todo_status (id, label) VALUES
     ('archived', 'Archived')
 ON CONFLICT (id) DO NOTHING;
 
--- Stamp the schema version this file defines (Convention 10).
+-- Stamp the schema version this file defines (Convention 9).
 INSERT INTO todo_meta (id, schema_version) VALUES (1, 1)
 ON CONFLICT (id) DO UPDATE SET schema_version = excluded.schema_version;

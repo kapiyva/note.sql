@@ -1,5 +1,5 @@
 -- basic: a minimal note.sql format with only the required columns.
--- Safe to re-apply to an existing database (Convention 9).
+-- Safe to re-apply to an existing database (Convention 8).
 
 CREATE TABLE IF NOT EXISTS basic_note (
     id         TEXT PRIMARY KEY,
@@ -14,6 +14,6 @@ CREATE TABLE IF NOT EXISTS basic_meta (
     schema_version INTEGER NOT NULL
 );
 
--- Stamp the schema version this file defines (Convention 10).
+-- Stamp the schema version this file defines (Convention 9).
 INSERT INTO basic_meta (id, schema_version) VALUES (1, 1)
 ON CONFLICT (id) DO UPDATE SET schema_version = excluded.schema_version;

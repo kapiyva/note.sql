@@ -1,5 +1,5 @@
 -- diary: a simple diary format with one entry per date and tags.
--- Safe to re-apply to an existing database (Convention 9).
+-- Safe to re-apply to an existing database (Convention 8).
 
 CREATE TABLE IF NOT EXISTS diary_entry (
     id         TEXT PRIMARY KEY,
@@ -28,6 +28,6 @@ CREATE TABLE IF NOT EXISTS diary_meta (
     schema_version INTEGER NOT NULL
 );
 
--- Stamp the schema version this file defines (Convention 10).
+-- Stamp the schema version this file defines (Convention 9).
 INSERT INTO diary_meta (id, schema_version) VALUES (1, 1)
 ON CONFLICT (id) DO UPDATE SET schema_version = excluded.schema_version;
